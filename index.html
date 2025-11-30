@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Component Playground</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #1e1e2e;
+            color: #f8f8f2;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #282a36;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #44475a;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #bd93f9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background-color: #44475a;
+            color: #f8f8f2;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #6272a4;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        .components-container, .preview-container {
+            flex: 1;
+            height: 100%;
+            position: relative;
+        }
+
+        .components-header, .preview-header {
+            background-color: #44475a;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #6272a4;
+        }
+
+        .components-header h2, .preview-header h2 {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .components {
+            width: 100%;
+            height: calc(100% - 42px);
+            background-color: #282a36;
+            padding: 15px;
+            overflow-y: scroll;
+        }
+
+        .component-category {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            font-size: 14px;
+            color: #bd93f9;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #44475a;
+        }
+
+        .component-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .component-item {
+            background-color: #44475a;
+            border-radius: 4px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .component-item:hover {
+            background-color: #6272a4;
+            transform: translateY(-2px);
+        }
+
+        .component-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .component-name {
+            font-size: 12px;
+        }
+
+        .preview {
+            width: 100%;
+            height:100%;
+            background-color: white;
+            border: none;
+        }
+
+        .resizer {
+            width: 8px;
+            background-color: #44475a;
+            cursor: col-resize;
+            transition: background-color 0.3s;
+        }
+
+        .resizer:hover {
+            background-color: #6272a4;
+        }
+
+        .status-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #282a36;
+            padding: 5px 15px;
+            font-size: 12px;
+            color: #6272a4;
+            border-top: 1px solid #44475a;
+        }
+
+        .components-icon, .preview-icon {
+            margin-right: 8px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid #6272a4;
+        }
+
+        .theme-toggle:hover {
+            background-color: #6272a4;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .resizer {
+                width: 100%;
+                height: 8px;
+                cursor: row-resize;
+            }
+        }
+            /* Background overlay */
+    #overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        backdrop-filter: blur(3px);
+        z-index: 999;
+    }
+
+    /* Floating form box */
+    #formBox {
+        width: 330px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0px 5px 25px rgba(0,0,0,0.2);
+        display: none;
+        animation: pop 0.25s;
+        z-index: 1000;
+        font-family: Arial, sans-serif;
+    }
+
+    @keyframes pop {
+        from {transform: translate(-50%, -50%) scale(0.8); opacity: 0;}
+        to {transform: translate(-50%, -50%) scale(1); opacity: 1;}
+    }
+
+    .input1 {
+        width: 100%;
+        padding: 10px;
+        margin: 6px 0;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 10px;
+        background: #4a8bfd;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+        font-size: 15px;
+    }
+
+    .btn:hover {
+        background: #2f6bea;
+    }
+
+    .closeBtn {
+        background: #ff4e4e;
+    }
+    
+    
+    
+    
+     .fullscreen-target {
+        width: 80%;
+        margin: 20px auto;
+        padding: 20px;
+        border: 2px solid #4a8bfd;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .fullscreen-active {
+        position: fixed;
+        inset: 0; /* top:0; left:0; right:0; bottom:0 */
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        border-radius: 5;
+        z-index: 9999;
+        overflow-y: auto;
+        background: white;
+        transition: all 0.3s ease;
+    }
+
+    .close-fullscreen {
+        display: none;
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        padding: 10px 15px;
+        background: red;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        z-index: 10000;
+        font-size: 14px;
+    }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">flovvnetic.io[W.D.K]->V-alpha 1.3</div>
+        <div class="controls">
+            <button id="runBtn">Update Preview</button>
+            <button id="clearBtn">Clear All</button>
+            <button id="saveBtn">Save HTML</button>
+            <button id="themeToggle" class="theme-toggle">Light Theme</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="components-container">
+            <div class="components-header">
+                <h2><span class="components-icon">🧩</span> Components</h2>
+                <div class="controls">
+                    <button id="resetBtn">Reset</button>
+                </div>
+            </div>
+            
+            <div style="color:#bd93f9;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            <input class="input1" type="text" id="userInput" placeholder="Content"><br>
+            </div>
+            <button onclick="updatey2()" style="padding:10px 16px;font-size:16px;margin:10px;">Upload</button>     
+            
+            
+            <!-- Trigger Button -->
+<button onclick="openForm()" style="padding:10px 16px;font-size:16px;margin:10px;">
+    Elaborate Input Sheet
+</button>
+
+<!-- Overlay + Floating Form -->
+<div id="overlay" onclick="closeForm()"></div>
+
+<div id="formBox">
+    <h2 style="margin-bottom:10px;color:black;">Container Content:</h2>
+    <div style="color:#bd93f9;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+            <input class="input1" type="text" id="userInput2" placeholder="Link"><br>
+            <input class="input1" type="text" id="userInput3" placeholder="Command"><br>
+            <input class="input1" type="text" id="userInput4" placeholder="Style"><br>
+            <input class="input1" type="text" id="userInput5" placeholder="ID"><br>
+            <input class="input1" type="text" id="userInput6" placeholder="Input type">
+                        
+    </div>
+    <input class="input1" type="text" id="Oname" placeholder="Organisation Name">
+    <input class="input1" type="text" id="width" placeholder="Width">
+    <input class="input1" type="text" id="height" placeholder="Height">
+    <input class="input1" type="text" id="color" placeholder="Colour">
+    <input class="input1" type="text" id="colortext" placeholder="Text Colour">
+    <input class="input1" type="text" id="style" placeholder="style">
+    <input class="input1" type="text" id="align" placeholder="Align">
+
+    <button class="btn" onclick="submitForm();updatey();">Submit</button>
+    <button class="btn closeBtn" onclick="closeForm()">Close</button>
+</div>
+            
+            <div class="components">
+                <div class="component-category">
+                    <div class="category-title">Text Elements</div>
+                    <div class="component-list">
+                        <div class="component-item" data-type="heading">
+                            <div class="component-icon">📝</div>
+                            <div class="component-name">Heading</div>
+                        </div>
+                        <div class="component-item" data-type="paragraph">
+                            <div class="component-icon">📄</div>
+                            <div class="component-name">Paragraph</div>
+                        </div>
+                        <div class="component-item" data-type="list">
+                            <div class="component-icon">📋</div>
+                            <div class="component-name">List</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="component-category">
+                    <div class="category-title">Interactive Elements</div>
+                    <div class="component-list">
+                        <div class="component-item" data-type="button">
+                            <div class="component-icon">🔘</div>
+                            <div class="component-name">Button</div>
+                        </div>
+                        <div class="component-item" data-type="link">
+                            <div class="component-icon">🔗</div>
+                            <div class="component-name">Link</div>
+                        </div>
+                        <div class="component-item" data-type="input">
+                            <div class="component-icon">⌨️</div>
+                            <div class="component-name">Input Field</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="component-category">
+                    <div class="category-title">Media Elements</div>
+                    <div class="component-list">
+                        <div class="component-item" data-type="image">
+                            <div class="component-icon">🖼️</div>
+                            <div class="component-name">Image</div>
+                        </div>
+                        <div class="component-item" data-type="video">
+                            <div class="component-icon">🎬</div>
+                            <div class="component-name">Video</div>
+                        </div>
+                        <div class="component-item" data-type="imgWithText">
+                            <div class="component-icon">🆘</div>
+                            <div class="component-name">Image with Text</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="component-category">
+                    <div class="category-title">Layout Elements</div>
+                    <div class="component-list">
+                        <div class="component-item" data-type="container">
+                            <div class="component-icon">📦</div>
+                            <div class="component-name">Container</div>
+                        </div>
+                        <div class="component-item" data-type="section">
+                            <div class="component-icon">📑</div>
+                            <div class="component-name">Section</div>
+                        </div>
+                        <div class="component-item" data-type="divider">
+                            <div class="component-icon">➖</div>
+                            <div class="component-name">Divider</div>
+                        </div>
+                        <div class="component-item" data-type="header">
+                            <div class="component-icon">🕳️</div>
+                            <div class="component-name">header</div>
+                        </div>
+                        <div class="component-item" data-type="footer">
+                            <div class="component-icon">🥅</div>
+                            <div class="component-name">footer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="status-bar">
+                <span>Click components to add them to your page</span>
+            </div>
+        </div>
+
+        <div class="resizer" id="resizer"></div>
+
+        <div class="preview-container">
+            <div class="preview-header">
+                <h2><span class="preview-icon">🌐</span> 
+                
+                <button onclick="openFullscreen()" style="padding:10px 16px;margin:10px; background:white;color:black;">
+    Expand Section
+</button>
+
+<button id="closeBtn" class="close-fullscreen" onclick="closeFullscreen()">
+    Close
+</button>
+                
+                </h2>
+                <div class="controls">
+                    <button id="refreshBtn">Refresh</button>
+                </div>
+            </div>
+            <iframe id="preview" class="preview" sandbox="allow-scripts"></iframe>
+            <div class="status-bar">
+                <span>Live Preview</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var myvar="Hello,sample";
+        var Cname="My organisation";
+        var link="https//:www.google.com";
+        var Uonclick="";
+        var Ustyle="";
+        var Uid="";
+        var Utype="";
+        var Uwidth="";
+        var Uheight="";
+        var r="";
+        var g="";
+        var b="";
+        var a="";
+        var fcolortext="white";
+        var fcolor="black";
+        var fstyle="";
+        var align="";
+        function updatey2(){
+        myvar=document.getElementById('userInput').value;
+        }
+        function updatey(){
+                link=document.getElementById('userInput2').value;
+                Uonclick=document.getElementById('userInput3').value;
+                Ustyle=document.getElementById('userInput4').value;
+                Uid=document.getElementById('userInput5').value;
+                Utype=document.getElementById('userInput6').value;
+                Cname=document.getElementById('Oname').value;
+                Uwidth=document.getElementById('width').value;
+                Uheight=document.getElementById('height').value;
+                r=document.getElementById('Oname').value;
+                g=document.getElementById('Oname').value;
+                b=document.getElementById('Oname').value;
+                a=document.getElementById('Oname').value;
+                fcolor=document.getElementById('color').value;
+                fcolortext=document.getElementById('colortext').value;
+                fstyle=document.getElementById('style').value;
+                align=document.getElementById('align').value;
+                
+            }
+        function openForm(){
+                document.getElementById("overlay").style.display = "block";
+                document.getElementById("formBox").style.display = "block";
+            }
+
+        function closeForm(){
+                document.getElementById("overlay").style.display = "none";
+                document.getElementById("formBox").style.display = "none";
+            }
+
+        function submitForm(){
+                            
+                 closeForm();
+            }
+        function openFullscreen(){
+                 let box = document.getElementById("preview");
+                 box.classList.add("fullscreen-active");
+                 document.getElementById("closeBtn").style.display = "block";
+            }
+
+        function closeFullscreen(){
+                 let box = document.getElementById("preview");
+                 box.classList.remove("fullscreen-active");
+                 document.getElementById("closeBtn").style.display = "none";
+            }
+    
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            const preview = document.getElementById('preview');
+            const runBtn = document.getElementById('runBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const themeToggle = document.getElementById('themeToggle');
+            const resizer = document.getElementById('resizer');
+            const componentItems = document.querySelectorAll('.component-item');
+            
+            // Store the current HTML content
+            let currentHTML = '';
+            
+            // Initial render
+            updatePreview();
+            
+            // Update preview button
+            runBtn.addEventListener('click', updatePreview);
+            
+            // Refresh button
+            refreshBtn.addEventListener('click', updatePreview);
+            
+            // Clear button
+            clearBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all components?')) {
+                    currentHTML = '';
+                    updatePreview();
+                }
+            });
+            
+            // Reset button
+            resetBtn.addEventListener('click', function() {
+                if (confirm('Reset to default template?')) {
+                    currentHTML = defaultTemplate;
+                    updatePreview();
+                }
+            });
+            
+            // Save button
+            saveBtn.addEventListener('click', function() {
+                const blob = new Blob([generateFullHTML()], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'my-webpage.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+            
+            // Theme toggle
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('light-theme');
+                if (document.body.classList.contains('light-theme')) {
+                    themeToggle.textContent = 'Dark Theme';
+                } else {
+                    themeToggle.textContent = 'Light Theme';
+                }
+            });
+            
+            // Component selection
+            componentItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const type = this.getAttribute('data-type');
+                    addComponent(type);
+                    updatePreview();
+                });
+            });
+            
+            // Resizer functionality
+            let isResizing = false;
+            resizer.addEventListener('mousedown', function(e) {
+                isResizing = true;
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', function() {
+                    isResizing = false;
+                    document.removeEventListener('mousemove', handleMouseMove);
+                });
+            });
+            
+            function handleMouseMove(e) {
+                if (!isResizing) return;
+                
+                const container = document.querySelector('.container');
+                const containerRect = container.getBoundingClientRect();
+                
+                if (window.innerWidth > 768) {
+                    // Horizontal resizing
+                    const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+                    document.querySelector('.components-container').style.width = `${newLeftWidth}%`;
+                    document.querySelector('.preview-container').style.width = `${100 - newLeftWidth}%`;
+                } else {
+                    // Vertical resizing
+                    const newTopHeight = ((e.clientY - containerRect.top) / containerRect.height) * 100;
+                    document.querySelector('.components-container').style.height = `${newTopHeight}%`;
+                    document.querySelector('.preview-container').style.height = `${100 - newTopHeight}%`;
+                }
+            }
+            
+            // Default template
+            const defaultTemplate = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${Cname}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin:0px;
+                            background-color: #f5f5f5;
+                        }
+                        button {
+                            background-color: #44475a;
+                            color: #f8f8f2;
+                            border: none;
+                            padding: 8px 15px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            transition: background-color 0.3s;
+                        }
+                        
+        
+                        .container {
+                            max-width: 800px;
+                            margin: 0 auto;
+                            background: white;
+                            padding: 20px;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        }
+                        h1 {
+                            color: #333;
+                            border-bottom: 2px solid #eee;
+                            padding-bottom: 10px;
+                        }
+                        p {
+                            line-height: 1.6;
+                            color: #666;
+                        }
+                        .button {
+                            display: inline-block;
+                            background: #4CAF50;
+                            color: white;
+                            padding: 10px 20px;
+                            text-decoration: none;
+                            border-radius: 4px;
+                            margin-top: 10px;
+                        }
+                    </style>
+                </head>
+                <body>
+                   
+                </body>
+                </html>
+            `;
+            
+            // Initialize with default template
+            currentHTML = defaultTemplate;
+            
+            // Function to add components
+            function addComponent(type) {
+                let componentHTML = ``;
+                
+                switch(type) {
+                    case 'header':
+                        componentHTML = `<div style="background-color: ${fcolor};
+                            padding: 15px 20px;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            border-bottom: 1px solid #44475a;}" class="header">
+                    <div class="logo">${Cname}</div>
+                     <div class="controls">
+                              <button id="runBtn">Update Preview</button>
+                              <button id="clearBtn">Clear All</button>
+                              <button id="saveBtn">Save HTML</button>
+                              <button id="themeToggle" class="theme-toggle">Light Theme</button>
+                         </div>
+                    </div>`;
+                        break;
+                    case 'imgWithText':
+                        componentHTML = `<div style="position:relative;width:min(900px,95%);margin:auto;border-radius:12px;overflow:hidden;box-shadow:0 10px 35px rgba(0,0,0,0.25);font-family:'Segoe UI',sans-serif;">
+
+    <!-- Image -->
+    <img src="${link}" 
+         style="width:100%;display:block;">
+
+    <!-- Color Tinge -->
+    <div style="
+        position:absolute;inset:0;
+        background:rgba(0,0,0,0.5);
+        backdrop-filter:blur(3px);
+    "></div>
+
+    <!-- Text -->
+    <div style="
+        position:absolute;inset:0;
+        display:flex;
+        justify-content:center;
+        align-items:${align};
+        flex-direction:column;
+        text-align:center;
+        color:white;
+        text-shadow:0 4px 18px rgba(0,0,0,0.6);
+        padding:20px;
+    ">
+        <h2 style="margin:0;font-size:clamp(24px,4vw,58px);font-weight:700;">
+            ${myvar}
+        </h2>
+        <p style="margin-top:8px;font-size:clamp(14px,1.5vw,20px);opacity:0.9;">
+            ${myvar}
+        </p>
+    </div>
+
+</div>`;
+                        break;
+                    case 'heading':
+                        componentHTML = `<div style="color:${fcolor};text-align:${align};"><h2>${myvar}</h2></div>`;
+                        break;
+                    case 'footer':
+                        componentHTML=`<div style="
+    width:100%;
+    background:${fcolor};
+    color:${fcolortext};
+    padding:30px 20px;
+    font-family:'Segoe UI',sans-serif;
+    box-sizing:border-box;
+">
+
+    <!-- Main Footer Content -->
+    <div q1"
+        max-width:1100px;
+        margin:auto;
+        display:flex;
+        flex-wrap:wrap;
+        gap:30px;
+        justify-content:space-between;
+    ">
+
+        <!-- Column 1 -->
+        <div style="flex:1;min-width:220px;">
+            <h3 style="margin:0 0 10px;font-size:20px;">${Oname}</h3>
+            <p style="margin:0;color:#ccc;font-size:14px;">
+                Making clean, modern and powerful websites.
+            </p>
+        </div>
+
+        <!-- Column 2 -->
+        <div style="flex:1;min-width:180px;">
+            <h4 style="margin-bottom:10px;font-size:17px;">Quick Links</h4>
+            <a href="#" style="display:block;color:#bbb;text-decoration:none;margin:4px 0;font-size:14px;">Home</a>
+            <a href="#" style="display:block;color:#bbb;text-decoration:none;margin:4px 0;font-size:14px;">About</a>
+            <a href="#" style="display:block;color:#bbb;text-decoration:none;margin:4px 0;font-size:14px;">Contact</a>
+            <a href="#" style="display:block;color:#bbb;text-decoration:none;margin:4px 0;font-size:14px;">Services</a>
+        </div>
+
+        <!-- Column 3 -->
+        <div style="flex:1;min-width:220px;">
+            <h4 style="margin-bottom:10px;font-size:17px;">Contact</h4>
+            <p style="margin:6px 0;color:#ccc;font-size:14px;">Email: support@flownetic.com</p>
+            <p style="margin:6px 0;color:#ccc;font-size:14px;">Phone: +91 98765 43210</p>
+        </div>
+
+    </div>
+
+    <!-- Divider Line -->
+    <div style="margin:25px auto;border-bottom:1px solid #333;width:100%;max-width:1100px;"></div>
+
+    <!-- Bottom Bar -->
+    <p style="text-align:center;margin:0;color:#aaa;font-size:14px;">
+        © 2025 ${Oname}. All rights reserved.
+    </p>
+</div>`
+                        break;
+                    case 'paragraph':
+    componentHTML = `<div style="color:${fcolortext}; text-align:${align};"><p>${myvar}</p></div>`;
+    break;
+
+case 'list':
+    componentHTML = `<div style="text-align:${align};"><ul><li>${myvar}</li></ul></div>`;
+    break;
+
+case 'button':
+    componentHTML = `<div style="text-align:${align};"><button style="color:${fcolortext}; background:${fcolor}" onclick="${Uonclick}">${myvar}</button></div>`;
+    break;
+
+case 'link':
+    componentHTML = `<div style="text-align:${align};"><a href="${link}" style="color:${fcolortext}; display:inline-block; margin:10px 0;">${myvar}</a></div>`;
+    break;
+
+case 'input':
+    componentHTML = `<div style="text-align:${align};"><input type="${Utype}" placeholder="Enter text here" style="padding: 8px; margin: 10px 0; display: block;" id="${Uid}"></div>`;
+    break;
+
+case 'image':
+    componentHTML = `<div style="text-align:${align};"><img src="${link}" alt="Image" style="max-width:100%; margin:10px 0;"></div>`;
+    break;
+
+case 'video':
+    componentHTML = `<div style="text-align:${align}; margin:10px 0;"><video width="100%" controls><source src="${link}" type="video/mp4">Your browser does not support the video tag.</video></div>`;
+    break;
+
+case 'container':
+    componentHTML = `<div style="background:${fcolor}; padding:15px; margin:10px 0; border-radius:5px; text-align:${align};">${myvar}</div>`;
+    break;
+
+case 'section':
+    componentHTML = `<section style="margin:20px 0; padding:15px; border-left:4px solid #4CAF50; background:${fcolor}; text-align:${align};">${myvar}</section>`;
+    break;
+
+case 'divider':
+    componentHTML = `<div style="text-align:${align};"><hr style="margin:20px 0; border-color:${fcolor};"></div>`;
+    break;
+                }
+                
+                // Insert the component before the closing body tag
+                const bodyCloseIndex = currentHTML.lastIndexOf('</body>');
+                if (bodyCloseIndex !== -1) {
+                    currentHTML = currentHTML.substring(0, bodyCloseIndex) + componentHTML + currentHTML.substring(bodyCloseIndex);
+                } else {
+                    currentHTML += componentHTML;
+                }
+            }
+            
+            // Function to generate full HTML
+            function generateFullHTML() {
+                return currentHTML;
+            }
+            
+            // Function to update the preview
+            function updatePreview() {
+                preview.srcdoc = generateFullHTML();
+            }
+            
+            // Add light theme styles
+            const style = document.createElement('style');
+            style.textContent = `
+                body.light-theme {
+                    background-color: #f5f5f5;
+                    color: #333;
+                }
+                
+                body.light-theme .header {
+                    background-color: #e9ecef;
+                    border-bottom-color: #ced4da;
+                }
+                
+                body.light-theme .logo {
+                    color: #495057;
+                }
+                
+                body.light-theme button {
+                    background-color: #6c757d;
+                    color: white;
+                }
+                
+                body.light-theme button:hover {
+                    background-color: #5a6268;
+                }
+                
+                body.light-theme .theme-toggle {
+                    background: none;
+                    border: 1px solid #6c757d;
+                    color: #6c757d;
+                }
+                
+                body.light-theme .theme-toggle:hover {
+                    background-color: #6c757d;
+                    color: white;
+                }
+                
+                body.light-theme .components-header,
+                body.light-theme .preview-header {
+                    background-color: #dee2e6;
+                    border-bottom-color: #adb5bd;
+                    color: #495057;
+                }
+                
+                body.light-theme .components {
+                    background-color: #f8f9fa;
+                    color: #212529;
+                }
+                
+                body.light-theme .status-bar {
+                    background-color: #e9ecef;
+                    color: #6c757d;
+                    border-top-color: #ced4da;
+                }
+                
+                body.light-theme .resizer {
+                    background-color: #ced4da;
+                }
+                
+                body.light-theme .resizer:hover {
+                    background-color: #adb5bd;
+                }
+                
+                body.light-theme .component-item {
+                    background-color: #e9ecef;
+                    color: #495057;
+                }
+                
+                body.light-theme .component-item:hover {
+                    background-color: #dee2e6;
+                }
+                
+                body.light-theme .category-title {
+                    color: #495057;
+                    border-bottom-color: #adb5bd;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
